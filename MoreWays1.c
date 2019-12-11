@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
             pulKeySwap2[ulKeyIndex] = ulKeyTemp;
         }
 
-// use XOR, One Complement and Two Complement to process the 256 bytes of plaintext data or ciphertext data at a time
+// use XOR, one's complement and two's complement to process the 256 bytes of plaintext data or ciphertext data at a time
         for(unsigned long k = 0; k < 256 && i + k < ulFileSize; ++k)
         {
             if(argv[1][0] == '-' && (argv[1][1] == 'C' || argv[1][1] == 'c'))
