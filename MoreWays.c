@@ -1,12 +1,13 @@
 // Usage (encryption): MoreWays -C/c plaintext.file ciphertext.file password
 // Usage (decryption): MoreWays -P/p ciphertext.file plaintext.file password
-// Compiled on MacOS, Linux and *BSD.
-// Talk is SO EASY, show you my GOD. WOW
+// Compiled on MacOS, Linux and *BSD in X86_64 platform.
+// Talk is SO EASY, show you my GOD.
+// Simple is beautiful.
 
+#include <fcntl.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
 
 int main(int argc, char *argv[])
@@ -20,7 +21,7 @@ int main(int argc, char *argv[])
 // The data of 256 values of key table that you can set randomly,
 // yet you can freely to change to key table of 65536 values that you can set randomly,
 // you can also freely to change to key table of 4294967296 values that you can set randomly,
-// even if to change to key table of 18446744073709551616 values is no problem, which is only limited by the memory of your machine. WOW!
+// even if to change to key table of 18446744073709551616 values is no problem, which is only limited by the memory of your machine.
     unsigned char aucKeyTable[256] = {
           0x9A, 0x36, 0xe9, 0x15, 0xdA, 0x91, 0x6F, 0x04, 0xf9, 0x18, 0x1B, 0x68, 0x28, 0x45, 0xf4, 0xa7, 0xfF, 0x5A, 0x2F, 0xb5, 0x41, 0x7A, 0x8D, 0x85, 0x2C, 0x13, 0x57, 0x3D, 0xb3, 0x53, 0x34, 0xeE,
           0xd8, 0xcA, 0xd1, 0x25, 0xc6, 0xc7, 0x2E, 0x33, 0x73, 0xe3, 0xcE, 0x4E, 0xcD, 0x10, 0xa9, 0x5D, 0x0F, 0xaE, 0x3C, 0x62, 0xbA, 0xa8, 0x51, 0x11, 0xf2, 0xeF, 0x21, 0x0A, 0x0B, 0xe4, 0x86, 0x7C,
@@ -34,28 +35,29 @@ int main(int argc, char *argv[])
 
     struct stat statFileSize;
 
-// get plaintext file size
     stat(argv[2], &statFileSize);
 
+// get plaintext file size
     unsigned long ulFileSize = statFileSize.st_size;
 
-// open plaintext/ciphertext file descriptor
-    int iPlaintextOrCiphertextFD = open(argv[2], O_RDONLY, S_IRUSR | S_IWUSR);
-
+// allocate storage space
     unsigned char *pucPlaintextOrCiphertext = (unsigned char*)malloc(ulFileSize);
 
-// read data from plaintext/ciphertext file
-    read(iPlaintextOrCiphertextFD, pucPlaintextOrCiphertext, ulFileSize);
+// open plaintext or ciphertext file
+    int iPlaintextOrCiphertext = open(argv[2], O_RDONLY, S_IRUSR | S_IWUSR);
 
-    close(iPlaintextOrCiphertextFD);
+// read data from plaintext or ciphertext file
+    read(iPlaintextOrCiphertext, pucPlaintextOrCiphertext, ulFileSize);
 
-// process plaintext data or ciphertext data
+    close(iPlaintextOrCiphertext);
+
+// process plaintext or ciphertext data
     for(unsigned long i = 0; i < ulFileSize; i += 256)
     {
-// key table convert 8 * 32 = 256 bytes of data at a time in order to generate the random number of "JunTai" distribution
+// key table convert 8 * 32 = 256 bytes of data at a time in order to generate the random number of "JunTai"(like Shuffle) distribution
         for(unsigned long j = 0; j < 32; ++j)
         {
-            unsigned long *pulKeySwap1 = (unsigned long*)aucKeyTable, *pulKeySwap2 = (unsigned long*)aucKeyTable, ulKeyTemp, ulKeyIndex;
+            unsigned long ulKeyIndex, ulKeyTemp, *pulKeySwap1 = (unsigned long*)aucKeyTable, *pulKeySwap2 = (unsigned long*)aucKeyTable;
 
             ulKeyIndex = (unsigned char)argv[4][j % ulPasswordLength] % 32;
 
@@ -94,13 +96,13 @@ int main(int argc, char *argv[])
         }
     }
 
-// open ciphertext/plaintext file descriptor
-    iPlaintextOrCiphertextFD = open(argv[3], O_CREAT | O_WRONLY, S_IREAD | S_IWRITE);
+// open ciphertext or plaintext file
+    iPlaintextOrCiphertext = open(argv[3], O_CREAT | O_WRONLY, S_IREAD | S_IWRITE);
 
-// write data to ciphertext/plaintext file
-    write(iPlaintextOrCiphertextFD, pucPlaintextOrCiphertext, ulFileSize);
+// write data to ciphertext or plaintext file
+    write(iPlaintextOrCiphertext, pucPlaintextOrCiphertext, ulFileSize);
 
-    close(iPlaintextOrCiphertextFD);
+    close(iPlaintextOrCiphertext);
 
     free(pucPlaintextOrCiphertext);
 
